@@ -1,0 +1,8 @@
+body {
+    background-color: #bbb;
+}
+
+.active-user {
+    display: flex;
+    flex-direction: row;
+}
