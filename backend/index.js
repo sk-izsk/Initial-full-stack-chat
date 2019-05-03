@@ -19,21 +19,21 @@ let sessions = {};
 let messages = [];
 let activeUser = [];
 
-app.get("/messages", function(req, res) {
+app.get("/messages", function (req, res) {
   res.send(JSON.stringify(messages));
 });
-app.get("/active", function(req, res) {
+app.get("/active", function (req, res) {
   res.send(JSON.stringify(activeUser));
 });
 
-app.post("/logout", function(req, res) {
+app.post("/logout", function (req, res) {
   let userN = sessions[req.cookies["sid"]];
   let index = activeUser.findIndex(u => u.name === userN);
 
   activeUser.splice(index, 1);
 });
 
-app.post("/deleteuser", upload.none(), function(req, res) {
+app.post("/deleteuser", upload.none(), function (req, res) {
   let username = req.body.del;
   let sessionss = req.cookies.sid;
   console.log("delete user", username);
@@ -159,3 +159,5 @@ app.post("/signup", upload.none(), (req, res) => {
 });
 
 app.listen(4000);
+
+// hello
