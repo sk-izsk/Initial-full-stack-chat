@@ -1,7 +1,9 @@
 let express = require("express");
 let cors = require("cors");
 let multer = require("multer");
-let upload = multer();
+let upload = multer({
+  dest: __dirname + "/uploads/"
+});
 let app = express();
 let cookieParser = require("cookie-parser");
 app.use(cookieParser());
@@ -11,6 +13,7 @@ app.use(
     origin: "http://localhost:3000"
   })
 );
+app.use("/images", express.static(__dirname + "/uploads"));
 
 let passwords = {
   admin: "admin"
@@ -18,25 +21,27 @@ let passwords = {
 let sessions = {};
 let messages = [];
 let activeUser = [];
+let bannedUser = {};
 
-app.get("/messages", function (req, res) {
+app.get("/messages", function(req, res) {
   res.send(JSON.stringify(messages));
 });
-app.get("/active", function (req, res) {
+app.get("/active", function(req, res) {
   res.send(JSON.stringify(activeUser));
 });
 
-app.post("/logout", function (req, res) {
+app.post("/logout", function(req, res) {
   let userN = sessions[req.cookies["sid"]];
   let index = activeUser.findIndex(u => u.name === userN);
 
   activeUser.splice(index, 1);
 });
 
-app.post("/deleteuser", upload.none(), function (req, res) {
+app.post("/deleteuser", upload.none(), function(req, res) {
   let username = req.body.del;
-  let sessionss = req.cookies.sid;
+
   console.log("delete user", username);
+  bannedUser[username] = true;
   messages.filter(x => {
     if (x.username) {
       return delete x.username;
@@ -55,11 +60,15 @@ app.post("/deleteuser", upload.none(), function (req, res) {
   console.log("passwords : ", passwords);
 });
 
-app.post("/newmessage", upload.none(), (req, res) => {
+app.post("/newmessage", upload.single("image"), (req, res) => {
   console.log("*** inside new message");
   console.log("body", req.body);
+
   let sessionId = req.cookies.sid;
   let username = sessions[sessionId];
+  if (bannedUser[username]) {
+    return res.send("banned");
+  }
   if (!sessionId || !username) {
     return res.send("<p>get a life</p>");
   }
@@ -71,6 +80,9 @@ app.post("/newmessage", upload.none(), (req, res) => {
     time: new Date().getSeconds()
   };
   console.log("new message", newMsg);
+  if (req.file) {
+    newMsg.imgPath = "http://localhost:4000/images/" + req.file.filename;
+  }
   messages = messages.concat(newMsg);
   messages = messages.slice(-20);
   console.log("updated messages", messages);
@@ -88,6 +100,9 @@ app.post("/login", upload.none(), (req, res) => {
   let enteredPassword = req.body.password;
   let expectedPassword = passwords[username];
   console.log("expected password", expectedPassword);
+  if (bannedUser[username]) {
+    return res.send("banned");
+  }
 
   if (enteredPassword === expectedPassword) {
     console.log("password matches");
@@ -95,6 +110,7 @@ app.post("/login", upload.none(), (req, res) => {
     console.log("generated id", sessionId);
     sessions[sessionId] = username;
     res.cookie("sid", sessionId);
+
     res.send(
       JSON.stringify({
         success: true,

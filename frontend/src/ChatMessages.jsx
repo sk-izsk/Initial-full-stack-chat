@@ -35,12 +35,19 @@ class UnconnectedChatMessages extends Component {
   };
   render = () => {
     console.log("ASDASDASDASD", this.props.active);
-    let msgToElement = e => (
-      <li>
-        {" "}
-        {e.username}:{e.message}:{e.time}{" "}
-      </li>
-    );
+
+    let msgToElement = e => {
+      let possibleImg = undefined;
+      if (e.imgPath !== undefined) {
+        possibleImg = <img src={e.imgPath} />;
+      }
+      return (
+        <li>
+          {" "}
+          {e.username}:{e.message}:{e.time} {possibleImg}{" "}
+        </li>
+      );
+    };
     let activeU = e => {
       console.log(e);
       return <li>{e.name}</li>;

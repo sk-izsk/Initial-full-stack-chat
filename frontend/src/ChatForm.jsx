@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 class UnconnectedChatForm extends Component {
   constructor(props) {
     super(props);
-    this.state = { message: "", delu: "" };
+    this.state = { message: "", delu: "", fileLocation: "" };
   } // 1
   handleMessageChange = event => {
     console.log("new message", event.target.value);
@@ -37,6 +37,8 @@ class UnconnectedChatForm extends Component {
 
     data.append("msg", this.state.message);
     console.log("cdata", data);
+    if (this.state.fileLocation !== undefined)
+      data.append("image", this.state.fileLocation);
     fetch("http://localhost:4000/newmessage", {
       method: "POST",
       body: data,
@@ -65,6 +67,9 @@ class UnconnectedChatForm extends Component {
       credentials: "include"
     });
   };
+  handleFile = ev => {
+    this.setState({ fileLocation: ev.target.files[0] });
+  };
 
   render = () => {
     // if (this.props.message[username] === "admin") {
@@ -72,6 +77,7 @@ class UnconnectedChatForm extends Component {
       <div>
         <form onSubmit={this.handleSubmit}>
           <input onChange={this.handleMessageChange} type="text" />
+          <input type="file" onChange={this.handleFile} />
           <input type="submit" />
           <button onClick={this.logOut}>logout</button>
         </form>
@@ -81,6 +87,7 @@ class UnconnectedChatForm extends Component {
         {this.props.admin && (
           <form onSubmit={this.deleteUser}>
             <input type="text" onChange={this.delUser} />
+            <input type="file" onChange={this.handleFile} />
             <input type="submit" value="delete user" />
           </form>
         )}
