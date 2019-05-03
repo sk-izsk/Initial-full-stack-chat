@@ -87,7 +87,7 @@ class UnconnectedChatForm extends Component {
         {this.props.admin && (
           <form onSubmit={this.deleteUser}>
             <input type="text" onChange={this.delUser} />
-            <input type="file" onChange={this.handleFile} />
+
             <input type="submit" value="delete user" />
           </form>
         )}
