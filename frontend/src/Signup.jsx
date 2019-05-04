@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-class Signup extends Component {
+import { connect } from "react-redux";
+class UnconnectedSignup extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -40,6 +41,15 @@ class Signup extends Component {
           alert("Username exist");
           return;
         }
+
+        this.props.dispatch({
+          type: "login-success"
+        });
+        if (body.admin) {
+          this.props.dispatch({
+            type: "admin"
+          });
+        }
       });
   };
 
@@ -55,4 +65,5 @@ class Signup extends Component {
     );
   };
 }
+let Signup = connect()(UnconnectedSignup);
 export default Signup;

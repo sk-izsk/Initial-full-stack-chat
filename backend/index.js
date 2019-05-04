@@ -106,10 +106,10 @@ app.post("/login", upload.none(), (req, res) => {
 
   if (enteredPassword === expectedPassword) {
     console.log("password matches");
-    let sessionId = generateId();
-    console.log("generated id", sessionId);
-    sessions[sessionId] = username;
-    res.cookie("sid", sessionId);
+    // let sessionId = generateId();
+    // console.log("generated id", sessionId);
+    // sessions[sessionId] = username;
+    // res.cookie("sid", sessionId);
 
     res.send(
       JSON.stringify({
@@ -158,6 +158,10 @@ app.post("/signup", upload.none(), (req, res) => {
   console.log("this is the body", req.body);
   let username = req.body.username;
   let enteredPassword = req.body.password;
+  let sessionId = generateId();
+  console.log("generated id", sessionId);
+  sessions[sessionId] = username;
+  res.cookie("sid", sessionId);
   if (passwords[username]) {
     return res.send(
       JSON.stringify({
@@ -165,13 +169,29 @@ app.post("/signup", upload.none(), (req, res) => {
       })
     );
   }
+
   passwords[username] = enteredPassword;
   console.log("passwords object", passwords);
+  let userActive = {
+    name: username
+    //time: (new Date()).getSeconds()
+  };
+  activeUser.push(userActive);
   res.send(
     JSON.stringify({
       success: true
     })
   );
+});
+
+app.get("/check-login", (req, res) => {
+  let sessionId = req.cookies.sid; // 22
+  let username = sessions[sessionId]; // 22
+  if (username !== undefined) {
+    res.send(JSON.stringify({ success: true }));
+    return;
+  }
+  res.send(JSON.stringify({ success: false }));
 });
 
 app.listen(4000);
